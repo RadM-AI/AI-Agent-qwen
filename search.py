@@ -1,31 +1,59 @@
-from ddgs import DDGS
+from langchain.vectorstores import FAISS
+from langchain.embeddings.base import Embeddings
+from sentence_transformers import SentenceTransformer
 
-def duckduckgo_search(query, max_results=5):
-    with DDGS() as ddgs:
-        results = ddgs.text(query, max_results=max_results)
-        res = ''
-        for i,r in enumerate(results, start= 1):
-            res+=str(i)+':\n'
-            res+=f"Заголовок: {r.get('title')}\n"
-            res+=f"Описание: {r.get('body')}\n"
-            res+=f"Ссылка: {r.get('href')}\n"
-            res+='\n'
+class QwenEmbeddings(Embeddings):
+    def __init__(self, model_name="Qwen/Qwen3-Embedding-0.6B"):
+        self.model = SentenceTransformer(model_name)
+
+    def embed_query(self, text):
+        embeddings = self.model.encode([text], prompt_name="query")
+        return embeddings[0].tolist()
+
+    def embed_documents(self, texts):
+        embeddings = self.model.encode(texts)
+        return [e.tolist() for e in embeddings]
+
+
+
+def faiss_search(query, max_results=3):
+    embeddings = QwenEmbeddings()
+    db = FAISS.load_local('/content/faiss_index', embeddings, allow_dangerous_deserialization=True)
+    result = db.similarity_search_with_score(query, k=max_results)
+    res = ''
+    for i,r in enumerate(result, start= 1):
+        title = r[0].page_content
+        r = r[0].metadata
+        res+=str(i)+':\n'
+        res+=f"Заголовок: {r.get('title')}\n"
+        res+=f"Новость: {r.get('text')}\n"
+        res+=f"Ссылка: {r.get('url')}\n"
+        res+='\n'
     res = '''
-Задача: На основе РЕЗУЛЬТАТА ПОИСКА сформируй для пользователя краткий и точный ответ.
 
-Строгие правила:
+Задача: На основе РЕЗУЛЬТАТА ПОИСКА сформируй для пользователя структурированный ответ по новостям.
 
-1. Анализ: Внимательно проанализируй все полученные данные. Определи одно ключевое историческое событие, которое является общим для большинства источников.
+Основные требования:
 
-2. Формулировка ответа: Ответ должен состоять строго из 2-х предложений и содержать только проверенные факты, которые повторяются в нескольких источниках.
+1. Анализ: Проанализируй каждую новость из результатов поиска. Выдели главные темы и ключевую информацию по каждой новости.
 
-    - Первое предложение: Укажи, что произошло (событие) и когда (дата).
+2. Структура ответа: Для каждой новости предоставь:
+   - Основная тема/заголовок
+   - Краткое описание (2-3 предложения) с самой важной информацией
+   - Ссылка на источник
 
-    -  Второе предложение: Укажи основной исторический итог или последствие этого события.
+3. Приоритеты: В первую очередь отрази:
+   - Главные события и факты
+   - Ключевые детали, которые имеют значение
+   - Важные даты, места, участники событий
 
-3. Запрещено: что-либо придумывать, добавлять детали, которых нет в результатах поиска, или менять ссылки.
+4. Требования к формату:
+   - Ответ должен быть четко структурирован по новостям
+   - Для каждой новости обязательно краткое описание (2-3 предложения) + ссылка
+   - Сохраняй только проверенные факты из результатов поиска
+   - Избегай дублирования информации
 
-4. Источник: В конце ответа обязательно добавь ссылку на тот источник из результатов поиска, который является наиболее авторитетным и полным (например, histrf.ru или tatarica.org в вашем примере).
+5. Запрещено: придумывать информацию, добавлять детали не из результатов поиска, изменять ссылки.
 
 РЕЗУЛЬТАТ ПОИСКА для анализа:\n
 '''+res
