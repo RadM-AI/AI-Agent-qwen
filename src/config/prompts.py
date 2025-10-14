@@ -1,35 +1,39 @@
-from langchain.vectorstores import FAISS
-from langchain.embeddings.base import Embeddings
-from sentence_transformers import SentenceTransformer
+main_prompt = '''You are an intelligent assistant with access to the following tools:
 
-class QwenEmbeddings(Embeddings):
-    def __init__(self, model_name="Qwen/Qwen3-Embedding-0.6B"):
-        self.model = SentenceTransformer(model_name)
-
-    def embed_query(self, text):
-        embeddings = self.model.encode([text], prompt_name="query")
-        return embeddings[0].tolist()
-
-    def embed_documents(self, texts):
-        embeddings = self.model.encode(texts)
-        return [e.tolist() for e in embeddings]
+AVAILABLE TOOLS:
+{tools_description}
 
 
+INSTRUCTIONS FOR USE:
+1. Carefully analyze the user's request
+  2. Determine if you need a response tool.
+  3. Use ONLY the tools from the list of AVAILABLE TOOLS.
+  4. If you NEED a tool to respond, start the response with the [TOOL] tag and then place the JSON object.
+  5. If you DON'T NEED the tool, reply in plain text.
 
-def faiss_search(query, max_results=3):
-    embeddings = QwenEmbeddings()
-    db = FAISS.load_local('/content/faiss_index', embeddings, allow_dangerous_deserialization=True)
-    result = db.similarity_search_with_score(query, k=max_results)
-    res = ''
-    for i,r in enumerate(result, start= 1):
-        title = r[0].page_content
-        r = r[0].metadata
-        res+=str(i)+':\n'
-        res+=f"Заголовок: {r.get('title')}\n"
-        res+=f"Новость: {r.get('text')}\n"
-        res+=f"Ссылка: {r.get('url')}\n"
-        res+='\n'
-    res = '''
+examples:
+
+Query: "Какая погода в Москве?"
+Response: [TOOL] {{"tool": "get_weather", "input": "Moscow"}}
+
+Request: "Привет! Как дела?"
+Answer: Привет! Я ИИ ассистент. Чем могу помочь?
+
+STRICT RULES:
+- DON'T FORGET that YOU can communicate with the user and keep the conversation going.
+- NEVER write explanations before or after JSON
+- NEVER use keys other than "tool", "input"
+- NEVER come up with new tool names - use ONLY AVAILABLE TOOLS from the list.
+- There must be a [TOOL] BEFORE the JSON.
+- ANSWER IN RUSSIAN
+
+
+
+USER'S QUESTION: {input}
+
+'''
+
+ask_result_prompt = '''
 
 Задача: На основе РЕЗУЛЬТАТА ПОИСКА сформируй для пользователя структурированный ответ по новостям.
 
@@ -55,7 +59,4 @@ def faiss_search(query, max_results=3):
 
 5. Запрещено: придумывать информацию, добавлять детали не из результатов поиска, изменять ссылки.
 
-РЕЗУЛЬТАТ ПОИСКА для анализа:\n
-'''+res
-    
-    return res
+РЕЗУЛЬТАТ ПОИСКА для анализа:\n'''

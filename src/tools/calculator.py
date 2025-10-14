@@ -3,28 +3,23 @@ from .base import BaseTool
 
 class CalculatorTool(BaseTool):
     """Инструмент для математических вычислений"""
-    
+
     @property
     def name(self) -> str:
         return "calculate"
     
     @property
     def description(self) -> str:
-        return "Calculate a mathematical expression."
-    
-    @property
-    def args(self) -> dict:
-        return {"expression": "string"}
-    
-    def invoke(self, input_data: str) -> str:
-        """Calculate a mathematical expression.
-
+        return """Calculate a mathematical expression.
         Args:
             input_data: A mathematical expression (for example: '2 + 2 * 3', 'sin(45)')
 
         Returns:
             Calculation result
         """
+
+    
+    def execute(self, input: str) -> str:
         try:
             print('Начал считать...')
             
@@ -41,10 +36,10 @@ class CalculatorTool(BaseTool):
                 'e': math.e
             }
             
-            if all(c in allowed_chars for c in input_data):
+            if all(c in allowed_chars for c in input):
                 # Безопасное вычисление с ограниченным контекстом
-                result = eval(input_data, {"__builtins__": {}}, safe_globals)
-                return f"ОТВЕТ КРАТКИЙ: Результат: {input_data} = {result}"
+                result = eval(input, {"__builtins__": {}}, safe_globals)
+                return f"ОТВЕТ КРАТКИЙ: Результат: {input} = {result}"
             else:
                 return "Ошибка: выражение содержит недопустимые символы"
                 

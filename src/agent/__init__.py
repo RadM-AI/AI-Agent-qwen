@@ -3,11 +3,11 @@
 """
 
 from .core import AIAgent
-from .memory import ConversationManager
+from .memory import ManageMemory
 from .response_processor import ResponseProcessor
 
 __all__ = [
     "AIAgent",
-    "ConversationManager", 
+    "ManageMemory", 
     "ResponseProcessor",
 ]
