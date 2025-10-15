@@ -2,7 +2,7 @@ from langchain.tools import tool
 import requests
 import json
 from weather import get
-from search import duckduckgo_search
+from search import faiss_search
 @tool
 def get_weather(input: str) -> str:
     """Get the current weather for the specified city.
@@ -51,6 +51,7 @@ def search_information(input: str) -> str:
     Returns:
         Information found
     """
-    resp = duckduckgo_search(input)
+    print('Уже ищу!')
+    resp = faiss_search(input)
     return resp
 
