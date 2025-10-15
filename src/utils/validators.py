@@ -1,5 +1,3 @@
-import math
-
 def is_valid_input(tool_name: str, input_data: str) -> bool:
     """Проверяет корректность входных данных для конкретного инструмента"""
     

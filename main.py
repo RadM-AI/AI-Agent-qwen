@@ -1,4 +1,3 @@
-from src.tools.registry import ToolRegistry
+from src.utils.validators import is_valid_expression, is_valid_input
 
-reg = ToolRegistry()
-print(reg.get_tools_description())
+print(is_valid_input(tool_name='calculate', input_data='2+2'))

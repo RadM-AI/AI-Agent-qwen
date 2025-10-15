@@ -2,7 +2,7 @@ from typing import Dict, List
 from .base import BaseTool
 from .weather import WeatherTool
 from .calculator import CalculatorTool
-from .search import SearchTool
+# from .search import SearchTool
 
 class ToolRegistry:
     """Реестр для управления всеми инструментами"""
@@ -16,7 +16,7 @@ class ToolRegistry:
         default_tools = [
             WeatherTool().get_tool(),
             CalculatorTool().get_tool(),
-            SearchTool().get_tool()
+            # SearchTool().get_tool()
         ]
         
         for tool in default_tools:
