@@ -3,7 +3,7 @@ main_prompt = '''You are an intelligent assistant with access to the following t
 HISTORY:
 {history}
 
-AVAILABLE TOOLS:
+YOUR AVAILABLE TOOLS:
 {tools_description}
 
 

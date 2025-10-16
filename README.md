@@ -39,5 +39,5 @@ pip install -r requirements.txt
 
 Запустить скрипт:
 ```bash
-python3 agent_final.py
+python3 main.py
 ```
