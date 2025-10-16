@@ -11,8 +11,9 @@ from ..tools.registry import ToolRegistry
 class AIAgent:
     def __init__(self):
         self.chat_model = self._setup_model()
+        self.tool_registry = ToolRegistry()
         self.tool_desctiption = ToolRegistry().get_tools_description()
-        self.memory = ManageMemory()
+        self.memory = ManageMemory().memory
         self.response_processor = ResponseProcessor(self.tool_registry)
         self.chain = self._build_chain()
         self.trim_resp = TrimResponseRunnable()
@@ -32,7 +33,7 @@ class AIAgent:
             template=main_prompt,
             input_variables=['input'],
             partial_variables={
-                'tools_description': self.tool_desctiption
+                'tools_description': self.tool_registry.get_tools_description()
             },
         )
         return prompt_template | self.chat_model | self.response_processor
@@ -54,17 +55,19 @@ class AIAgent:
         })
 
     def chat(self, user_input: str) -> str:
-        history = self.memory.get_history()
+
+        history = self.memory.load_memory_variables({})["history"]
+        history_text = "\n".join([f"{msg.type}: {msg.content}" for msg in history])
         response = self.chain.invoke({
             "input": user_input,
-            "history": history
+            "history": history_text
         })
 
         if hasattr(response, "ai_message"):
-            self.memory.save_interaction(user_input, response['ai_message'])
+            self.memory.save_context({"input": user_input}, {"output": response['ai_message']})
             return response
         
         else:
             response = self._result_ask_ai(user_question=user_input, previous_result=response)   
-            self.memory.save_interaction(user_input, response.content)
-            return response.content
+            self.memory.save_context({"input": user_input}, {"output": response})
+            return response

@@ -1,3 +1,16 @@
-from src.utils.validators import is_valid_expression, is_valid_input
+from src.agent.core import AIAgent
+from src.config.settings import settings
 
-print(is_valid_input(tool_name='calculate', input_data='2+2'))
+settings.MODEL_NAME = 'D:\model'
+
+
+agent = AIAgent()
+
+while True:
+    input_ = input("Вы:")
+
+    if input_.lower().strip() == "выход":
+        break
+
+    else:
+        print(agent.chat(input_)) 

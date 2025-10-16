@@ -1,5 +1,8 @@
 main_prompt = '''You are an intelligent assistant with access to the following tools:
 
+HISTORY:
+{history}
+
 AVAILABLE TOOLS:
 {tools_description}
 

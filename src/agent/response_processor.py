@@ -2,7 +2,6 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.runnables.base import Runnable
 from typing import Any, Optional
 
-from ..tools.registry import ToolRegistry
 from ..utils.parse import parse_ai_response
 
 
@@ -18,8 +17,8 @@ class TrimResponseRunnable(Runnable):
         return text.content
 
 class ResponseProcessor(Runnable):
-    def __init__(self):
-        self.tool_registry = ToolRegistry()
+    def __init__(self, tool_registry):
+        self.tool_registry = tool_registry
     
     def invoke(self, input: Any, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Any:
         if hasattr(input, "content"):
