@@ -1,5 +1,4 @@
 from langchain.vectorstores import FAISS
-from langchain.embeddings.base import Embeddings
 
 
 def faiss_search(query, embeddings, max_results=3):
