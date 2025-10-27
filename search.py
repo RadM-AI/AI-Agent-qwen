@@ -1,23 +1,8 @@
 from langchain.vectorstores import FAISS
 from langchain.embeddings.base import Embeddings
-from sentence_transformers import SentenceTransformer
-
-class QwenEmbeddings(Embeddings):
-    def __init__(self, model_name="Qwen/Qwen3-Embedding-0.6B"):
-        self.model = SentenceTransformer(model_name)
-
-    def embed_query(self, text):
-        embeddings = self.model.encode([text], prompt_name="query")
-        return embeddings[0].tolist()
-
-    def embed_documents(self, texts):
-        embeddings = self.model.encode(texts)
-        return [e.tolist() for e in embeddings]
 
 
-
-def faiss_search(query, max_results=3):
-    embeddings = QwenEmbeddings()
+def faiss_search(query, embeddings, max_results=3):
     db = FAISS.load_local('/content/faiss_index', embeddings, allow_dangerous_deserialization=True)
     result = db.similarity_search_with_score(query, k=max_results)
     res = ''
