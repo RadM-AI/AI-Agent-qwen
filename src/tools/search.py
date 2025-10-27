@@ -18,10 +18,11 @@ class SearchTool(BaseTool):
             Information found
         """
     
-    def execute(self, input: str) -> str:
+    def execute(self, input) -> str:
         print('Уже ищу!')
         try:
-            resp = faiss_search(input)
+            inp, emb_model = input
+            resp = faiss_search(input, emb_model)
             return resp
         except Exception as e:
             return f"Ошибка поиска: {str(e)}"
