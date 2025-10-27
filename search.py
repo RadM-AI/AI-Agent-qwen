@@ -15,9 +15,9 @@ class QwenEmbeddings(Embeddings):
         return [e.tolist() for e in embeddings]
 
 
+embeddings = QwenEmbeddings()
 
 def faiss_search(query, max_results=3):
-    embeddings = QwenEmbeddings()
     db = FAISS.load_local('/content/faiss_index', embeddings, allow_dangerous_deserialization=True)
     result = db.similarity_search_with_score(query, k=max_results)
     res = ''
