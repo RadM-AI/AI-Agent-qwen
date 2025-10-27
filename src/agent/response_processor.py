@@ -17,9 +17,9 @@ class TrimResponseRunnable(Runnable):
         return text.content
 
 class ResponseProcessor(Runnable):
-    def __init__(self, tool_registry):
+    def __init__(self, tool_registry, embend_model):
         self.tool_registry = tool_registry
-    
+        self.embend_model = embend_model
     def invoke(self, input: Any, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Any:
         if hasattr(input, "content"):
             ai_message = input.content
@@ -44,8 +44,12 @@ class ResponseProcessor(Runnable):
                 return {"error": "Invalid AI response"}
 
             try:
-                result = self.tool_registry.execute_tool(tool_call.tool, tool_call.input)
-                return result
+                if tool_call.tool == "search_information":
+                    result = self.tool_registry.execute_tool(tool_call.tool, [tool_call.input, self.embend_model])
+                    return result
+                else:
+                    result = self.tool_registry.execute_tool(tool_call.tool, tool_call.input)
+                    return result
             except Exception as e:
                 return {"error": f"Tool execution failed: {str(e)}"}
 
