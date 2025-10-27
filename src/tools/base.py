@@ -22,7 +22,7 @@ class BaseTool(ABC):
     def get_tool(self):
         """Создает декорированный @tool метод"""
         # Создаем функцию-обертку
-        def tool_function(input: str) -> str:
+        def tool_function(input) -> str:
             return self.execute(input)
         
         tool_function.__doc__ = self.description
