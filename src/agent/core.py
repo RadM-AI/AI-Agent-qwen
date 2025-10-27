@@ -8,7 +8,7 @@ from .memory import ManageMemory
 from .response_processor import ResponseProcessor, TrimResponseRunnable
 from ..tools.registry import ToolRegistry
 from sentence_transformers import SentenceTransformer
-
+from langchain.embeddings.base import Embeddings
 
 class QwenEmbeddings(Embeddings):
     def __init__(self, model_name="Qwen/Qwen3-Embedding-0.6B"):
