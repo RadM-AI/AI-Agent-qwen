@@ -33,7 +33,7 @@ class ToolRegistry:
             raise ValueError(f"Инструмент '{tool_name}' не найден")
         return self._tools[tool_name]
     
-    def execute_tool(self, tool_name: str, input_data: str) -> str:
+    def execute_tool(self, tool_name: str, input_data) -> str:
         """Выполняет инструмент"""
         tool = self.get_tool(tool_name)
         return tool.invoke(input_data)
