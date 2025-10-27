@@ -7,14 +7,30 @@ from ..config.prompts import main_prompt, ask_result_prompt
 from .memory import ManageMemory
 from .response_processor import ResponseProcessor, TrimResponseRunnable
 from ..tools.registry import ToolRegistry
+from sentence_transformers import SentenceTransformer
+
+
+class QwenEmbeddings(Embeddings):
+    def __init__(self, model_name="Qwen/Qwen3-Embedding-0.6B"):
+        self.model = SentenceTransformer(model_name)
+
+    def embed_query(self, text):
+        embeddings = self.model.encode([text], prompt_name="query")
+        return embeddings[0].tolist()
+
+    def embed_documents(self, texts):
+        embeddings = self.model.encode(texts)
+        return [e.tolist() for e in embeddings]
+
 
 class AIAgent:
     def __init__(self):
+        self.embed_model = QwenEmbeddings()
         self.chat_model = self._setup_model()
         self.tool_registry = ToolRegistry()
         self.tool_desctiption = ToolRegistry().get_tools_description()
         self.memory = ManageMemory().memory
-        self.response_processor = ResponseProcessor(self.tool_registry)
+        self.response_processor = ResponseProcessor(self.tool_registry, self.embed_model)
         self.chain = self._build_chain()
         self.trim_resp = TrimResponseRunnable()
     
