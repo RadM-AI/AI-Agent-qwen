@@ -10,7 +10,7 @@ class TrimResponseRunnable(Runnable):
         text = input
         if hasattr(text, "content"):
             text.content = text.content
-        start_pos = text.content.find('<|im_start|>assistant')
+        start_pos = text.content.rfind('<|im_start|>assistant')
         if start_pos != -1:
             text.content = text.content[start_pos+len('<|im_start|>assistant'):]
         
@@ -23,7 +23,7 @@ class ResponseProcessor(Runnable):
     def invoke(self, input: Any, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Any:
         if hasattr(input, "content"):
             ai_message = input.content
-        start_pos = ai_message.find('<|im_start|>assistant')
+        start_pos = ai_message.rfind('<|im_start|>assistant')
         if start_pos != -1:
             ai_message = ai_message[start_pos+len('<|im_start|>assistant'):]
             ai_message = self._process_ai_message(ai_message)
