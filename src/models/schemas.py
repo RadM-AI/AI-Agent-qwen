@@ -13,3 +13,7 @@ class ChatMessage(BaseModel):
 class ChatResponse(BaseModel):
     content: str
     tool_calls: Optional[list[ToolCall]] = None
+
+class RedirectAgent(BaseModel):
+    agent: str
+    request: str

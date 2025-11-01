@@ -3,6 +3,7 @@ from langchain_core.runnables.base import Runnable
 from typing import Any, Optional
 
 from ..utils.parse import parse_ai_response
+from ..utils.communication_agent import redirection_agent
 
 
 class TrimResponseRunnable(Runnable):
@@ -17,8 +18,9 @@ class TrimResponseRunnable(Runnable):
         return text.content
 
 class ResponseProcessor(Runnable):
-    def __init__(self, tool_registry):
+    def __init__(self, tool_registry, agents):
         self.tool_registry = tool_registry
+        self.agent = agents
     
     def invoke(self, input: Any, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Any:
         if hasattr(input, "content"):
@@ -48,6 +50,23 @@ class ResponseProcessor(Runnable):
                 return result
             except Exception as e:
                 return {"error": f"Tool execution failed: {str(e)}"}
+        
+        if '[AGENT]' in ai_message:
+            start = ai_message.find('[AGENT]')
+            ask = ai_message[start+8:].strip()
+            agent_redir = redirection_agent(ask)
+            print('передали запрос', agent_redir)
+            if not agent_redir:
+
+                return {"error": "Invalid AI response"}
+            
+            try:
+                result = self.agent[agent_redir.agent].chat(agent_redir.request, is_final_agent=False)
+                return result
+            except Exception as e:
+                return {"error": f"Agent execution failed: {str(e)}"}
+
+
 
         else:
             return {"ai_message": ai_message}
